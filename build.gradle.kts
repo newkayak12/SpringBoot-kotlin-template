@@ -1,5 +1,3 @@
-import org.jetbrains.kotlin.allopen.gradle.AllOpenExtension
-
 plugins {
     kotlin("jvm") version "1.9.25"
     id("org.springframework.boot") version "3.4.5" apply false
@@ -9,10 +7,9 @@ plugins {
     kotlin("kapt") version "1.9.25" apply false
 
     id("org.asciidoctor.jvm.convert") version "3.3.2" apply false
-    id ("com.epages.restdocs-api-spec") version "0.19.4" apply false
-    id ("org.hidetake.swagger.generator") version "2.18.2" apply false
+    id("com.epages.restdocs-api-spec") version "0.19.4" apply false
+    id("org.hidetake.swagger.generator") version "2.18.2" apply false
 }
-
 
 java {
     toolchain {
@@ -26,7 +23,7 @@ kotlin {
     }
 }
 
-allprojects{
+allprojects {
     group = "com.base"
     version = "0.0.1-SNAPSHOT"
 
@@ -34,8 +31,6 @@ allprojects{
         mavenCentral()
     }
 }
-
-
 
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
@@ -48,14 +43,11 @@ subprojects {
     dependencies {
         implementation("org.jetbrains.kotlin:kotlin-reflect")
         implementation("org.springframework.boot:spring-boot-starter-web")
+        implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+
         testImplementation("org.springframework.boot:spring-boot-starter-test")
         testRuntimeOnly("org.junit.platform:junit-platform-launcher")
         testImplementation("org.jetbrains.kotlin:kotlin-test-junit5")
-
-        implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
-
-
-
     }
 
     extra["snippetsDir"] = file("build/generated-snippets")
@@ -68,73 +60,55 @@ subprojects {
     }
 }
 
-
-
 val queryDslVersion = "5.1.0"
 
-project(":shared-module"){
-    tasks.named("bootJar") {
-        enabled = false
-    }
-    tasks.named("jar") {
-        enabled = true
-    }
+project(":shared-module") {
+    tasks.named("bootJar") { enabled = false }
+    tasks.named("jar") { enabled = true }
 
     dependencies {
         implementation("org.springframework.security:spring-security-crypto")
     }
 }
 
-project(":core-module"){
+project(":core-module") {
     apply(plugin = "org.jetbrains.kotlin.plugin.jpa")
     apply(plugin = "org.jetbrains.kotlin.kapt")
 
-    tasks.named("bootJar") {
-        enabled = false
-    }
-    tasks.named("jar") {
-        enabled = true
-    }
+    tasks.named("bootJar") { enabled = false }
+    tasks.named("jar") { enabled = true }
 
     val kapt by configurations
 
-    dependencies{
+    dependencies {
         implementation("org.springframework.boot:spring-boot-starter-data-jpa")
         compileOnly("com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta")
-        add("kapt","com.querydsl:querydsl-apt:${queryDslVersion}:jakarta")
-        add("kapt","jakarta.annotation:jakarta.annotation-api")
-        add("kapt","jakarta.persistence:jakarta.persistence-api")
+        add("kapt", "com.querydsl:querydsl-apt:${queryDslVersion}:jakarta")
+        add("kapt", "jakarta.annotation:jakarta.annotation-api")
+        add("kapt", "jakarta.persistence:jakarta.persistence-api")
     }
 }
 
-project(":application-module"){
-    tasks.named("bootJar") {
-        enabled = false
-    }
-    tasks.named("jar") {
-        enabled = true
-    }
+project(":application-module") {
+    tasks.named("bootJar") { enabled = false }
+    tasks.named("jar") { enabled = true }
     dependencies {
         implementation("org.springframework.security:spring-security-core:6.3.5")
     }
 }
 
-project(":adapter-module"){
+project(":adapter-module") {
     apply(plugin = "org.jetbrains.kotlin.plugin.jpa")
     apply(plugin = "org.asciidoctor.jvm.convert")
     apply(plugin = "com.epages.restdocs-api-spec")
     apply(plugin = "org.hidetake.swagger.generator")
 
-    tasks.named("bootJar") {
-        enabled = true
-    }
-    tasks.named("jar") {
-        enabled = false
-    }
+    tasks.named("bootJar") { enabled = true }
+    tasks.named("jar") { enabled = false }
 
     val developmentOnly by configurations
 
-    dependencies{
+    dependencies {
         implementation("org.springframework.boot:spring-boot-starter-actuator")
         implementation("org.springframework.boot:spring-boot-starter-validation")
         implementation("org.springframework.boot:spring-boot-starter-security")
@@ -146,8 +120,8 @@ project(":adapter-module"){
         implementation("com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta")
 
         developmentOnly("org.springframework.boot:spring-boot-docker-compose")
-        testImplementation ("com.navercorp.fixturemonkey:fixture-monkey:1.1.8")
-        testImplementation ("com.navercorp.fixturemonkey:fixture-monkey-jakarta-validation:1.1.5")
+        testImplementation("com.navercorp.fixturemonkey:fixture-monkey:1.1.8")
+        testImplementation("com.navercorp.fixturemonkey:fixture-monkey-jakarta-validation:1.1.5")
         testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
         testImplementation("org.springframework.security:spring-security-test")
     }
