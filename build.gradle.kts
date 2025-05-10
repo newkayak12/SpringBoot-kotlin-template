@@ -6,6 +6,7 @@ plugins {
     kotlin("plugin.spring") version "1.9.25" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
     kotlin("plugin.jpa") version "1.9.25" apply false
+    kotlin("kapt") version "1.9.25" apply false
 
     id("org.asciidoctor.jvm.convert") version "3.3.2" apply false
     id ("com.epages.restdocs-api-spec") version "0.19.4" apply false
@@ -39,11 +40,10 @@ allprojects{
 subprojects {
     apply(plugin = "org.jetbrains.kotlin.jvm")
     apply(plugin = "org.jetbrains.kotlin.plugin.spring")
-
     apply(plugin = "org.springframework.boot")
     apply(plugin = "io.spring.dependency-management")
 
-    val developmentOnly by configurations
+
 
     dependencies {
         implementation("org.jetbrains.kotlin:kotlin-reflect")
@@ -54,7 +54,7 @@ subprojects {
 
         implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 
-        developmentOnly("org.springframework.boot:spring-boot-docker-compose")
+
 
     }
 
@@ -86,6 +86,9 @@ project(":shared-module"){
 }
 
 project(":core-module"){
+    apply(plugin = "org.jetbrains.kotlin.plugin.jpa")
+    apply(plugin = "org.jetbrains.kotlin.kapt")
+
     tasks.named("bootJar") {
         enabled = false
     }
@@ -93,11 +96,14 @@ project(":core-module"){
         enabled = true
     }
 
+    val kapt by configurations
+
     dependencies{
+        implementation("org.springframework.boot:spring-boot-starter-data-jpa")
         compileOnly("com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta")
-        annotationProcessor("com.querydsl:querydsl-apt:${queryDslVersion}:jakarta")
-        annotationProcessor("jakarta.annotation:jakarta.annotation-api")
-        annotationProcessor("jakarta.persistence:jakarta.persistence-api")
+        add("kapt","com.querydsl:querydsl-apt:${queryDslVersion}:jakarta")
+        add("kapt","jakarta.annotation:jakarta.annotation-api")
+        add("kapt","jakarta.persistence:jakarta.persistence-api")
     }
 }
 
@@ -126,7 +132,7 @@ project(":adapter-module"){
         enabled = false
     }
 
-
+    val developmentOnly by configurations
 
     dependencies{
         implementation("org.springframework.boot:spring-boot-starter-actuator")
@@ -138,11 +144,8 @@ project(":adapter-module"){
         implementation("org.flywaydb:flyway-mysql")
         runtimeOnly("com.mysql:mysql-connector-j")
         implementation("com.querydsl:querydsl-jpa:${queryDslVersion}:jakarta")
-        annotationProcessor("com.querydsl:querydsl-apt:${queryDslVersion}:jakarta")
-        annotationProcessor("jakarta.annotation:jakarta.annotation-api")
-        annotationProcessor("jakarta.persistence:jakarta.persistence-api")
 
-
+        developmentOnly("org.springframework.boot:spring-boot-docker-compose")
         testImplementation ("com.navercorp.fixturemonkey:fixture-monkey:1.1.8")
         testImplementation ("com.navercorp.fixturemonkey:fixture-monkey-jakarta-validation:1.1.5")
         testImplementation("org.springframework.restdocs:spring-restdocs-mockmvc")
