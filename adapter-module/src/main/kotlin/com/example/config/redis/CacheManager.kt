@@ -33,6 +33,7 @@ internal class CacheManager (val objectMapper: ObjectMapper) {
             )
             .entryTtl(ttl)
 
+    @Suppress("UnusedPrivateMember")
     private fun <T> listConfiguration(clazz: Class<T>, ttl: Duration): RedisCacheConfiguration {
         val typeFactory: TypeFactory = objectMapper.typeFactory
         val javaType: JavaType = typeFactory.constructCollectionType(MutableList::class.java, clazz)

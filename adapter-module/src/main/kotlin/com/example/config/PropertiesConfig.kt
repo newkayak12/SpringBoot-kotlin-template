@@ -8,5 +8,4 @@ import org.springframework.context.annotation.Configuration
 
 @Configuration
 @EnableConfigurationProperties(value = [JwtProperties::class, JwtWhitelist::class, XssBlacklist::class])
-class PropertiesConfig {
-}
+class PropertiesConfig

@@ -1,6 +1,5 @@
 package com.example.config.i18n
 
-import com.example.config.persistence.PersistenceConfig
 import org.springframework.context.MessageSource
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration

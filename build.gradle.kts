@@ -1,15 +1,24 @@
 plugins {
-    kotlin("jvm") version "1.9.25"
     id("org.springframework.boot") version "3.4.5" apply false
-    kotlin("plugin.spring") version "1.9.25" apply false
     id("io.spring.dependency-management") version "1.1.7" apply false
-    kotlin("plugin.jpa") version "1.9.25" apply false
-    kotlin("kapt") version "1.9.25" apply false
+    kotlin("jvm") version "2.0.10"
+    kotlin("plugin.spring") version "2.0.10" apply false
+    kotlin("plugin.jpa") version "2.0.10" apply false
+    kotlin("kapt") version "2.0.10" apply false
 
     id("org.asciidoctor.jvm.convert") version "3.3.2" apply false
     id("com.epages.restdocs-api-spec") version "0.19.4" apply false
     id("org.hidetake.swagger.generator") version "2.18.2" apply false
+    id("io.gitlab.arturbosch.detekt") version "1.23.7"
+    id("com.diffplug.spotless") version "6.25.0"
+    id("com.github.ben-manes.versions") version "0.51.0"
 }
+
+detekt {
+    config.setFrom(files("$rootDir/detekt.yaml"))
+    buildUponDefaultConfig = true
+}
+
 
 java {
     toolchain {
@@ -22,6 +31,59 @@ kotlin {
         freeCompilerArgs.addAll("-Xjsr305=strict")
     }
 }
+
+
+spotless {
+    kotlin {
+        target("**/*.kt")
+        ktlint("1.2.1") // 원하는 ktlint 버전 지정
+        trimTrailingWhitespace()
+        indentWithSpaces(4)
+        endWithNewline()
+    }
+
+    kotlinGradle {
+        target("**/*.kts")
+        ktlint("1.2.1")
+    }
+}
+
+tasks.register("gitPreCommitHook") {
+    doLast {
+        println("Running spotlessKotlinGradleApply before commit...")
+
+        // spotlessKotlinGradleApply 작업 실행 (gradlew를 통해 실행)
+        exec {
+            commandLine("bash", "./gradlew", "spotlessKotlinGradleApply")
+        }
+        exec {
+            commandLine("bash", "./gradlew", "detekt")
+        }
+
+        // 변경된 파일을 git에 다시 stage
+        exec {
+            commandLine("git", "add", ".")
+        }
+    }
+}
+
+// pre-commit 후크 설정
+tasks.named("gitPreCommitHook") {
+    doLast {
+        val hookFile = file(".git/hooks/pre-commit")
+        if (!hookFile.exists()) {
+            hookFile.writeText(
+                """
+                #!/bin/sh
+                ./gradlew gitPreCommitHook
+                """.trimIndent(),
+            )
+            hookFile.setExecutable(true)
+            println("Git pre-commit hook set up successfully!")
+        }
+    }
+}
+
 
 allprojects {
     group = "com.base"
@@ -37,6 +99,7 @@ subprojects {
     apply(plugin = "org.jetbrains.kotlin.plugin.spring")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "io.spring.dependency-management")
+    apply(plugin = "io.gitlab.arturbosch.detekt")
 
 
 

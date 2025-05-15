@@ -1,10 +1,14 @@
 spring:
     config:
-        import: "classpath:hibernate.yaml"
         activate:
             on-profile: stage
     jpa:
-        database-platform: org.hibernate.dialect.H2Dialect
-        properties:
-            hibernate:
-                dialect: org.hibernate.dialect.H2Dialect
+        database-platform: org.hibernate.dialect.MySQL8Dialect
+        hibernate:
+            ddl-auto: create-drop
+    datasource:
+        hikari:
+        driver-class-name: com.p6spy.engine.spy.P6SpyDriver
+        url: jdbc:mysql://localhost:3306/base?serverTimezone=UTC&characterEncoding=UTF-8
+        username: temporary
+        password: temporary

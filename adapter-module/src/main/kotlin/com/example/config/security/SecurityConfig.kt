@@ -66,6 +66,4 @@ class SecurityConfig(
             .addFilterAfter(CrossSiteScriptFilter(xssPath), RequestCacheAwareFilter::class.java)
             .build()
     }
-
-
 }

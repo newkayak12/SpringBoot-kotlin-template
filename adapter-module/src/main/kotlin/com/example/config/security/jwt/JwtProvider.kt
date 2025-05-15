@@ -13,17 +13,18 @@ import java.util.*
 import javax.crypto.SecretKey
 
 class JwtProvider(properties: JwtProperties) : TokenProvider<TokenableAuthenticationDetails> {
-    private val PREFIX: String = "Bearer"
-    private val EXPIRE_TIME: Long = properties.expireTime
-    private val SIGNING_KEY: SecretKey = Keys.hmacShaKeyFor(Base64.getEncoder().encode(properties.secret.toByteArray(Charsets.UTF_8)))
-    private val ISSUER: String = properties.issuer
-    private val ID: String = "id"
-    private val ROLE: String = "role"
+    private val prefix: String = "Bearer"
+    private val expireTime: Long = properties.expireTime
+    private val signingKey: SecretKey = Keys.hmacShaKeyFor(Base64.getEncoder()
+        .encode(properties.secret.toByteArray(Charsets.UTF_8)))
+    private val issuer: String = properties.issuer
+    private val id: String = "id"
+    private val role: String = "role"
 
-    private fun removeBearer(bearerToken: String): String = bearerToken.replace(PREFIX, "").trim { it <= ' ' }
+    private fun removeBearer(bearerToken: String): String = bearerToken.replace(prefix, "").trim { it <= ' ' }
     private fun parse(bearerToken: String): Claims {
         val token = removeBearer(bearerToken)
-        val parser: JwtParser = Jwts.parser().verifyWith(SIGNING_KEY).build()
+        val parser: JwtParser = Jwts.parser().verifyWith(signingKey).build()
         val jws: Jws<Claims> = parser.parseSignedClaims(token)
 
         return jws.payload
@@ -34,18 +35,18 @@ class JwtProvider(properties: JwtProperties) : TokenProvider<TokenableAuthentica
 
     override fun tokenize(tokenable: TokenableAuthenticationDetails): String {
         val now = LocalDateTime.now()
-        return PREFIX +  Jwts.builder()
+        return prefix +  Jwts.builder()
             .id(tokenable.identity())
-            .issuer(ISSUER)
+            .issuer(issuer)
             .issuedAt(Date.from(now.atZone(ZoneId.systemDefault()).toInstant()))
-            .expiration(Date.from(now.plus(EXPIRE_TIME, ChronoUnit.MILLIS).atZone(ZoneId.systemDefault()).toInstant()))
+            .expiration(Date.from(now.plus(expireTime, ChronoUnit.MILLIS).atZone(ZoneId.systemDefault()).toInstant()))
             .claims(
                 mapOf(
-                    Pair(ID, tokenable.username),
-                    Pair(ROLE, tokenable.role())
+                    Pair(id, tokenable.username),
+                    Pair(role, tokenable.role())
                 )
             )
-            .signWith(SIGNING_KEY)
+            .signWith(signingKey)
             .compact()
     }
 
@@ -62,7 +63,7 @@ class JwtProvider(properties: JwtProperties) : TokenProvider<TokenableAuthentica
         val claims: Claims = parse(token)
 
         return TokenableAuthenticationDetails(
-            claims.id, claims[ID] as String, "", claims[ROLE] as SecurityRole
+            claims.id, claims[id] as String, "", claims[role] as SecurityRole
         );
     }
 }
